@@ -102,10 +102,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if reader.read_line(&mut line).await.unwrap() == 0 {
                 break;
             }
-            let trimmed_line = line.trim().to_string();
-            if !trimmed_line.is_empty() {
-                tx.send(trimmed_line).unwrap();
+            let mut trimmed_line = line.trim().to_string();
+            if trimmed_line.is_empty() {
+                trimmed_line = " ";
             }
+            tx.send(trimmed_line).unwrap();
         }
     });
     // Task to send messages from user input to the WebSocket
