@@ -16,7 +16,16 @@ const server = new WebSocket.Server({
     port: 3000,
 });
 
-const CONFIG_FILE = "/home/gabocota/clustwrkr/config.json";
+const {
+    Client,
+    GatewayIntentBits
+} = require('discord.js');
+
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers]
+});
+
+const CONFIG_FILE = "/home/gabocota/clustwrkr/confg.json";
 const config = readJson(CONFIG_FILE);
 
 var p = {};
@@ -106,7 +115,13 @@ app.post("/kill/", function (req, res) {
 server.on("connection", (ws, req) => {
     const heartbeat = () => {
         if (ws.isAlive === false) {
-            console.log("Terminating connection due to inactivity");
+            console.log("Lost connection sending panic message...");
+            const channel = client.channels.cache.get(config.disChannel);
+            if (channel) {
+                channel.send("@everyone i lost connection to the main server");
+            } else {
+                console.log('Channel not found');
+            }
             return ws.terminate();
         }
 
@@ -153,3 +168,5 @@ server.on("connection", (ws, req) => {
 });
 
 app.listen(3001, () => {});
+
+client.login(config.disKey)
